@@ -1,7 +1,8 @@
-const validator = require("validator");
-const Articulo = require("../modelos/Articulo")
+const {validarArticulo} = require("../helpers/validar");
+const Articulo = require("../modelos/Articulo");
 
-const prueba = (rep, res) => {
+
+const prueba = (req, res) => {
 
     return res.status(200).json({
         mensaje: "Soy una accion de prueba en nuestro controlador de articulos"
@@ -21,21 +22,12 @@ const curso = (req, res) => {
 };
 
 const crear = (req, res) => {
-
     //Recoger parametros por post a guardar
     let parametros = req.body;
 
     //Validar datos
     try {
-
-        let validar_titulo = !validator.isEmpty(parametros.titulo) &&
-            validator.isLength(parametros.titulo, { min: 5, max: undefined });
-
-        let validar_contenido = !validator.isEmpty(parametros.contenido);
-
-        if (!validar_titulo || !validar_contenido) {
-            throw new Error("No se ha validado la informacion!!")
-        }
+        validarArticulo(parametros);
 
     } catch (error) {
         return res.status(400).json({
@@ -51,7 +43,6 @@ const crear = (req, res) => {
     //articulo.titulo = parametros.titulo;
 
     //Guardar el articulo en la base de datos
-    //Devolver resultado
     articulo.save()
         .then((articuloGuardado) => {
 
@@ -61,6 +52,7 @@ const crear = (req, res) => {
                 mensaje: "Articulo creado con exito"
             });
         })
+        //Devolver resultado
         .catch((error) => {
             return res.status(400).json({
                 status: "error",
@@ -95,10 +87,9 @@ const listar = (req, res) => {
         });
 }
 
-const uno = (rep, res) => {
+const uno = (req, res) => {
     //Recoger una id por la url
-    let id = rep.params.id;
-
+    let id = req.params.id;
     //Buscar el articulo
     Articulo.findById(id)
         //Devolver resultado
@@ -118,4 +109,65 @@ const uno = (rep, res) => {
 }
 
 
-module.exports = { prueba, curso, crear, listar, uno }
+const borrar = (req, res) => {
+
+    let articuloId = req.params.id;
+
+    Articulo.findOneAndDelete({ _id: articuloId })
+
+        .then((articuloBorrado) => {
+            return res.status(200).json({
+                status: "succes",
+                articulo: articuloBorrado,
+                mensaje: "Articulo borrado"
+            });
+        })
+        .catch((error) => {
+            if (error || !articuloBorrado) {
+                return res.status(400).json({
+                    status: "error",
+                    mensaje: "Error al borrar el articulo"
+                })
+            }
+        })
+}
+
+
+const editar = (req, res) => {
+    //Recoger id articulo a editar
+    let articuloId = req.params.id;
+
+    //Recoger datos del body
+    let parametros = req.body
+
+    //Validar datos
+    try {
+        validarArticulo(parametros);
+
+    } catch (error) {
+        return res.status(400).json({
+            status: "error",
+            mensaje: "Faltan datos por enviar"
+        })
+    }
+    //Buscar y actualizar articulo
+    Articulo.findOneAndUpdate({ _id: articuloId }, parametros, { new: true })
+        //Devolver respuesta
+        .then((articuloActualizado) => {
+            return res.status(200).json({
+                status: "succes",
+                articulo: articuloActualizado
+            });
+        })
+        .catch((error) => {
+            if (error || !articuloActualizado) {
+                return res.status(500).json({
+                    status: "error",
+                    mensaje: "Error al actualizar el articulo"
+                })
+            }
+        })
+
+
+}
+module.exports = { prueba, curso, crear, listar, uno, borrar, editar }

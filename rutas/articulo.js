@@ -12,5 +12,7 @@ router.post("/crear", articuloControlador.crear)
 // El simbolo de interrogacion " ? " quiere decir que es opcional y sin el simbolo que es obligatorio
 router.get("/articulos/:ultimos?", articuloControlador.listar)
 router.get("/articulo/:id", articuloControlador.uno)
+router.delete("/articulo/:id", articuloControlador.borrar)
+router.put("/articulo/:id", articuloControlador.editar)
 
 module.exports = router;
