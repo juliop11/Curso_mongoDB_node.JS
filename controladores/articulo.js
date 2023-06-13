@@ -87,7 +87,7 @@ const listar = (req, res) => {
         });
 }
 
-const uno = (req, res) => {
+const mostrarUno = (req, res) => {
     //Recoger una id por la url
     let id = req.params.id;
     //Buscar el articulo
@@ -170,4 +170,4 @@ const editar = (req, res) => {
 
 
 }
-module.exports = { prueba, curso, crear, listar, uno, borrar, editar }
+module.exports = { prueba, curso, crear, listar, mostrarUno, borrar, editar }
